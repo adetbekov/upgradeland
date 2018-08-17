@@ -1,0 +1,26 @@
+{% for comment in comments %}
+	<hr>
+	  <div class="row">
+    	<div class="col-md-1 mr-0 pr-0">
+    		{% include "avatar.html" with class="float-xs-left mr-1" src=comment.user.profile.image width="40px" height="40px" %}
+    	</div>
+    	<div class="col-md-11 ml-0 pl-0">
+		    <h6 class="card-title mb-0"><b><a href="{% url 'profile' comment.user.id %}">{{comment.user.get_full_name|default:comment.user}}</a></b>
+			{% if comment.user == request.user or request.user.is_staff %}
+				<form action="{% url 'hidecommentpost' %}" method="POST" class="float-xs-right">
+					{% csrf_token %}
+					<input name="comment" type="text" class="hidden-xs-up" value="{{comment.id}}">
+			    	<button type="submit" class="close">
+		          		<span aria-hidden="true">&times;</span>
+		        	</button>
+	        	</form>
+			{% endif %}
+	        </h6>
+	        <span class="card-text pt-0 mt-0"><small>{{comment.comment}}</small></span>
+		    <h6 class="card-subtitle text-muted"><small><small>{{comment.created}}</small></small></h6>
+    	</div>
+	  </div>
+{% empty %}
+	<hr>
+	<p>Нет комментов!</p>
+{% endfor %}

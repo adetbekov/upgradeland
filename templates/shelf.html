@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load url_tags %}
+{% load lib %}
+{% load crispy_forms_tags %}
+{% block title %}Полка "{{shelf.title}}"{% endblock %}
+{% block content %}
+  <style type="text/css">
+    .book_img{
+      height: 200px;
+      width: 142.85px; 
+      max-width: 142.85px; 
+    }
+  </style>
+  <div class="card card-block row mb-0">
+  <h4 class="mb-0"><a href="{{library_url}}"><i class="fa fa-chevron-left"></i> Назад</a>&nbsp;&nbsp;Полка "{{shelf.title}}"</h4>
+  </div>
+  <div class="row mt-1">
+    {% get_shelf_book shelf.id as books %}
+    {% for book in books %}
+      <div class="col-lg-6">
+        <div class="card book_card">
+          {% if book.image %}
+            <div class="book_img w-100" style="background: url({{book.image.url}}) center center; background-size: cover;"></div>
+          {% elif book.typeof == 'F' %}
+            <div class="book_img w-100" style="background: url({% static 'images/file.png' %}) center center; background-size: cover;"></div>
+          {% elif book.typeof == 'V' %}
+            <div class="book_img w-100" style="background: url({% static 'images/video.png' %}) center center; background-size: cover;"></div>
+          {% elif book.typeof == 'I' %}
+            <div class="book_img w-100" style="background: url({% static 'images/image.png' %}) center center; background-size: cover;"></div>
+          {% elif book.typeof == 'P' %}
+            <div class="book_img w-100" style="background: url({% static 'images/pdf.png' %}) center center; background-size: cover;"></div>
+          {% elif book.typeof == 'D' %}
+            <div class="book_img w-100" style="background: url({% static 'images/doc.png' %}) center center; background-size: cover;"></div>
+          {% elif book.typeof == 'A' %}
+            <div class="book_img w-100" style="background: url({% static 'images/audio.png' %}) center center; background-size: cover;"></div>
+          {% elif book.typeof == 'Z' %}
+            <div class="book_img w-100" style="background: url({% static 'images/archive.png' %}) center center; background-size: cover;"></div>
+          {% endif %}
+          <div class="card-block">
+            <h4 class="card-title">{{book.name}}</h4>
+            <p class="card-text">{{book.description}}</p>
+            <a href="{{book.file.url}}" target="_blank" class="btn btn-primary">Скачать</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock content %}

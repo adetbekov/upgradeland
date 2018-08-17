@@ -1,0 +1,10 @@
+{% load staticfiles %}
+<style type="text/css">
+	#{{class}}_style:before{
+		content: "";
+		display: block;
+		padding-top: 100%;
+	}
+</style>
+<div id="{{class}}_style" class="circlemask {{class}}" style="background-image: url({% if src %}{{src.url}}{% else %}{% static 'images/user.png' %}{% endif %});width:{{width|default:'50px'}}; height:{{height|default:'50px'}};{{style}}">
+</div>

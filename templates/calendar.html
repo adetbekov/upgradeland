@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load url_tags %}
+{% load events %}
+{% load crispy_forms_tags %}
+{% block title %}Календарь событий{% endblock %}
+{% block content %}
+  <div class="card card-block row mb-0">
+  <h4 class="mb-0">Календарь событий за <b>{% now 'M' %}</b></h4>
+  <br>
+  <div class="row">
+    <div class="table-responsive px-1">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Пн.</th>
+          <th>Вт.</th>
+          <th>Ср.</th>
+          <th>Чт.</th>
+          <th>Пт.</th>
+          <th>Сб.</th>
+          <th>Вс.</th>
+        </tr>
+      </thead>
+      {% for tr in calendar %}
+        <tr class="tr-calendar">
+        {% for td in tr %}
+          {% now 'd' as day %}
+          <td class="td-calendar {% if day|add:'0' == td %}table-warning{% endif %}">
+            <div class="row px-1">{% if td != 0 %}{{td}}{% endif %}</div>
+            <small>
+            {% get_events td as events%}
+            {% for event in events %}
+              <button role="button" class="text-sm-left btn-link comment p-0 btn-block" data-toggle="modal" data-target="#commentModal" data-id="{{event.id}}" data-title="{{event.title}}" data-color="{% if event.color == 'P' %}bg-primary{% elif event.color == 'S' %}bg-success{% elif event.color == 'W' %}bg-warning{% elif event.color == 'I' %}bg-info{% elif event.color == 'D' %}bg-danger{% endif %}">
+              {% if event.color == "P" %}
+                <div class="bg-primary card text-white px-1 mb-0"><span>{{event.title}}</span></div>
+              {% elif event.color == "D" %}
+                <div class="bg-danger card text-white px-1 mb-0"><span>{{event.title}}</span></div>
+              {% elif event.color == "S" %}
+                <div class="bg-success card text-white px-1 mb-0"><span>{{event.title}}</span></div>
+              {% elif event.color == "W" %}
+                <div class="bg-warning card text-white px-1 mb-0"><span>{{event.title}}</span></div>
+              {% else %}
+                <div class="bg-info card text-white px-1 mb-0"><span>{{event.title}}</span></div>
+              {% endif %}
+              <div class="hidden-xs-up" id="event-{{event.id}}">
+                <div class="modalevent clearfix"><p>{{event.description}}</p><span class="text-muted float-xs-right">{{event.date}}</span></div>
+              </div>
+              </button>
+            {% endfor %}
+            </small>
+          </td>
+        {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+    </div>
+  </div>
+  </div>
+{% endblock content %}
+{% block scripts %}
+  <div class="modal fade" id="commentModal" tabindex="1003" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width:400px;" role="document">
+      <div class="modal-content">
+        <div class="modal-header"> 
+          <h5 class="modal-title float-xs-left" id="commentModalLabel">Комментарий</h5>
+          <button type="button" class="close float-xs-right" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="post-view"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    $('#commentModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget); 
+    var id = button.data('id'); 
+    var title = button.data('title'); 
+    var color = button.data('color'); 
+    var modal = $(this);
+    modal.find('.modal-title').html('<b>' + title + '</b>')
+    modal.find('.modal-body input').val(id)
+    modal.find('.modal-body .sendcomment').attr("data-id",id);
+    modal.removeClass("bg-primary");
+    modal.removeClass("bg-danger");
+    modal.removeClass("bg-info");
+    modal.removeClass("bg-warning");
+    modal.removeClass("bg-success");
+    modal.addClass(color);
+    $(".post-view").empty();
+    $( "#event-"+id ).children().clone().appendTo( ".post-view" );
+    });
+  </script>
+{% endblock %}

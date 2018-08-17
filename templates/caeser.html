@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load lessons %}
+{% block title %}Caeser crypto{% endblock %}
+{% block content %}
+  <div class="card card-block row">
+  <h4>Caeser crypto</h4>
+  <hr>
+  <form method="GET" action="{% url 'caeser' %}">
+    <textarea name="text" class="form-control w-100 mb-1" placeholder="Введите шифр"></textarea>
+    <button type="submit" class="btn btn-primary">Расшифровка</button>
+  </form>
+  </div>
+  <div class="card row card-inverse card-primary">
+    <div class="card-block">
+      <blockquote class="card-blockquote">
+        <h4>Частые буквы:</h4>
+        <footer class="text-xs-justify">{{ordered}}</footer>
+      </blockquote>
+    </div>
+  </div>
+  <div class="card row card-inverse card-success">
+    <div class="card-block">
+      <blockquote class="card-blockquote">
+        <h4>Вероятностная расшифровка:</h4>
+        <footer class="text-xs-justify">{{result}}</footer>
+      </blockquote>
+    </div>
+  </div>
+  {% for encript in encripts %}
+    <div class="card row">
+      <div class="card-block">
+        <blockquote class="card-blockquote">
+          <h4>Буква <b>"{{encript.letter}}"</b> <small>Перестановка = {{encript.k}}</small></h4>
+          <footer class="text-xs-justify">{{encript.text}}</footer>
+        </blockquote>
+      </div>
+    </div>
+  {% endfor %}
+{% endblock content %}

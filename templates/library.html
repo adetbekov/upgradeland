@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load url_tags %}
+{% load lib %}
+{% load crispy_forms_tags %}
+{% block title %}База знаний{% endblock %}
+{% block content %}
+  <style type="text/css">
+    .alert-danger li{
+      list-style:none;
+    }
+    .alert-danger ul{
+      padding: 0px;
+      margin-bottom: 0px;
+    }
+    .row-fluid{
+    white-space: nowrap;
+    /*height: 100%;*/
+    position: absolute;
+    bottom: 0em;
+
+    }
+    .row-fluid .book{
+
+        display: inline-block;
+        flex-direcrion:row;
+      flex-wrap: space-between;
+      align-items: flex-end;
+    }
+    .span11 {
+        scrollbar-3dlight-color:#0d64ad;
+        scrollbar-arrow-color:#fff;
+        scrollbar-base-color:#003c6e; 
+        scrollbar-darkshadow-color:#000;
+        scrollbar-face-color:#175488; 
+        scrollbar-track-color:#3b8cd0; 
+    }
+     
+    ::-webkit-scrollbar{
+        width:12px;
+    }
+    ::-webkit-scrollbar-thumb{
+        border-width:1px 1px 1px 2px;
+        border-color: #777;
+        background-color: #aaa;
+    }
+    ::-webkit-scrollbar-thumb:hover{
+        border-width: 1px 1px 1px 2px;
+        border-color: #555;
+        background-color: #777;
+    }
+    ::-webkit-scrollbar-track{
+        border-width:0;
+        background: #ecf0f1;
+    }
+  </style>
+  <div class="card card-block row mb-0">
+  <h4 class="mb-0">База знаний</h4>
+  </div>
+  {% for shelf in shelves %}
+  <div class="row lib_block">
+    <div class="span11" style="overflow-y:hidden;height:100%;position: relative;">
+      <h4 class="p-1 full">&nbsp;<a href="{% url 'shelf' shelf.id %}" style="overflow-y:hidden;height:100%;position: relative;">{{shelf.title}}</a></h4>
+        <div class="row-fluid">
+            {% get_shelf_book shelf.id 10 as books %}
+            {% for book in books %}
+              {% if book.image %}
+                <a href="{{book.file.url}}" target="_blank" class="book rounded-top ttip" style="background: url({{book.image.url}}) center center; background-size: cover;"><span class="ttiptext ttip-top" style="overflow: auto;display: inline;">{{book.name}}</span></a>
+              {% elif book.typeof == 'F' %}
+                <a href="{{book.file.url}}" target="_blank" class="book rounded-top ttip" style="background: url({% static 'images/file.png' %}) center center; background-size: cover;"><span class="ttiptext ttip-top" style="overflow: auto;display: inline;">{{book.name}}</span></a>
+              {% elif book.typeof == 'V' %}
+                <a href="{{book.file.url}}" target="_blank" class="book rounded-top ttip" style="background: url({% static 'images/video.png' %}) center center; background-size: cover;"><span class="ttiptext ttip-top" style="overflow: auto;display: inline;">{{book.name}}</span></a>
+              {% elif book.typeof == 'I' %}
+                <a href="{{book.file.url}}" target="_blank" class="book rounded-top ttip" style="background: url({% static 'images/image.png' %}) center center; background-size: cover;"><span class="ttiptext ttip-top" style="overflow: auto;display: inline;">{{book.name}}</span></a>
+              {% elif book.typeof == 'P' %}
+                <a href="{{book.file.url}}" target="_blank" class="book rounded-top ttip" style="background: url({% static 'images/pdf.png' %}) center center; background-size: cover;"><span class="ttiptext ttip-top" style="overflow: auto;display: inline;">{{book.name}}</span></a>
+              {% elif book.typeof == 'D' %}
+                <a href="{{book.file.url}}" target="_blank" class="book rounded-top ttip" style="background: url({% static 'images/doc.png' %}) center center; background-size: cover;"><span class="ttiptext ttip-top" style="overflow: auto;display: inline;">{{book.name}}</span></a>
+              {% elif book.typeof == 'A' %}
+                <a href="{{book.file.url}}" target="_blank" class="book rounded-top ttip" style="background: url({% static 'images/audio.png' %}) center center; background-size: cover;"><span class="ttiptext ttip-top" style="overflow: auto;display: inline;">{{book.name}}</span></a>
+              {% elif book.typeof == 'Z' %}
+                <a href="{{book.file.url}}" target="_blank" class="book rounded-top ttip" style="background: url({% static 'images/archive.png' %}) center center; background-size: cover;"><span class="ttiptext ttip-top" style="overflow: auto;display: inline;">{{book.name}}</span></a>
+              {% endif %}
+            {% empty %}
+              <p>Полка пуста!</p>
+            {% endfor %}
+            <a href="{% url 'shelf' shelf.id %}" class="book rounded-top bg-primary" style="background: url({% static 'images/readmore_button.png' %}) center center; background-size: 190%;"></a>
+        </div>
+    </div>
+  </div> 
+  {% empty %}
+    <p>Полок нет!</p>
+  {% endfor %}
+{% endblock content %}
+{% block scripts %}
+  <script type="text/javascript" src="{% static 'js/jquery.mousewheel.js' %}"></script>
+  <script type="text/javascript">
+    $(function() {
+
+       $(".span11").mousewheel(function(event, delta) {
+
+          this.scrollLeft -= (delta * 30);
+        
+          event.preventDefault();
+
+       });
+
+    });
+  </script>
+{% endblock scripts %}

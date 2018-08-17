@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load lessons %}
+{% block title %}Мой кабинет{% endblock %}
+{% block content %}
+{% for stream in streams %}
+{% get_lessons stream.id as lessons %}
+  <div class="card card-block row">
+  <h4><b>{{stream.name}}</b></h4>
+  <p>{{stream.description}}</p>
+    <div id="accordion" role="tablist" aria-multiselectable="true">
+    {% for lesson in lessons %}
+      <div class="card">
+        <div class="card-header" role="tab" id="heading-{{lesson.id}}">
+          <h5 class="mb-0">
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapse-{{lesson.id}}" aria-expanded="true" aria-controls="collapse-{{lesson.id}}">
+              {{lesson.name}}
+              <small class="float-xs-right text-muted"><small>{{lesson.day|date:"d M"}}</small></small>
+            </a>
+          </h5>
+        </div>
+        <div id="collapse-{{lesson.id}}" class="collapse {% current_day lesson.id %} show" role="tabpanel" aria-labelledby="heading-{{lesson.id}}">
+          <div class="card-block">
+            <div class="row">
+              <div class="col-lg-1 col-md-2 col-sm-2">{% include "avatar.html" with class="float-xs-left mr-1" src=lesson.tutor.profile.image %}</div>
+              <div class="col-lg-11 col-md-10 col-sm-10 pl-2"><h5 class="mb-0"><small class="text-muted"><em>Тьютор:</em></small> <a href="{% url 'profile' lesson.tutor.id %}">{{lesson.tutor.get_full_name|default:lesson.tutor}}</a></h5><h5 class="mb-0"><small class="text-muted"><em>Место:</em> {{lesson.place}}</small></h5><p>{{lesson.description|linebreaks}}</p>
+              {% open_lesson request.user.id lesson.id as open %}
+              {% if open %}
+              <div class="btn-group" role="group" aria-label="Basic example">
+                <a class="btn btn-secondary mb-1" href="{% url 'content' lesson.id %}">Материал</a>
+                <a class="btn btn-secondary mb-1" href="{% url 'hw' lesson.id %}">Домашнее задание</a>
+                <a class="btn btn-secondary mb-1" href="{% url 'attendance' lesson.id %}">Посещения</a>
+              </div>
+              {% endif %}
+              {% if request.user.is_staff or request.user.profile.face == "T" %}
+              <hr class="mt-0">
+                <div class="btn-group float-xs-right ml-1 mb-1">
+                  <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Курирование
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="{% url 'checks' lesson.id %}">Чек-лист д.з.</a>
+                    <a class="dropdown-item" href="{% url 'put_attendance' lesson.id %}">Посещения</a>
+                  </div>
+                </div>
+              {% endif %}
+              {% if request.user.is_admin or request.user.profile.face == "A" %}
+                <div class="btn-group float-xs-right">
+                  <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Администрирование
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="http://{{request.get_host}}/admin/cabinet/lesson/{{stream.id}}/change/">Настройка курса</a>
+                    <a class="dropdown-item" href="http://{{request.get_host}}/admin/cabinet/stream/{{stream.id}}/change/">Настройка потока</a>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>Нет занятий!</p>
+    {% endfor %}
+    </div>
+  </div>
+{% empty %}
+  <div class="card card-block row">
+  <p>Нет потоков!</p>
+  </div>
+{% endfor %}
+{% endblock content %}

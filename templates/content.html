@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load lessons %}
+{% block title %}{{lesson.name}}{% endblock %}
+{% block content %}
+  <script src="{% static 'js/jquery.min.js' %}"></script>
+  <script src="{% static 'js/video_uppod.js' %}" type="text/javascript"></script>
+  <script src="{% static 'js/uppod.js' %}" type="text/javascript"></script>
+  <div class="card card-block row">
+  <h4><a href="{{cabinet_url}}"><i class="fa fa-chevron-left"></i> Назад</a>&nbsp;&nbsp;<b>{{lesson.name}}</b><small class="float-xs-right text-muted"><small>{{lesson.day|date:"d M"}}</small></small></h4>
+  <hr>
+  {% open_lesson request.user.id lesson.id as open %}
+  {% if open %}
+    {% if lesson.file %}
+        <div class="player " id="videoplayer"></div>
+    {% endif %}
+  	<p>{{lesson.content|safe}}</p>
+  {% else %}
+  	<p>Ах ты хитрец :) Но доступа ты не получишь, пока не наступит <b>{{lesson.day|date:"d M Y"}}</b></p>
+  {% endif %}
+  </div>
+{% endblock content %}
+{% block scripts %}
+  <script type="text/javascript">
+      {% if lesson.file %}
+      this.player = new Uppod({m:"video",uid:"videoplayer",file:"{{lesson.file.url}}"});
+      {% endif %}
+  </script>
+{% endblock scripts %}

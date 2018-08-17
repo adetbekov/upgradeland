@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load lessons %}
+{% block title %}Проставление посещения - {{lesson.name}}{% endblock %}
+{% block content %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/selectize.css' %}" />
+  <div class="card card-block row">
+  <h4><a href="{{cabinet_url}}"><i class="fa fa-chevron-left"></i> Назад</a>&nbsp;&nbsp; Проставление посещения <b>{{lesson.name}}</b><small class="float-xs-right text-muted"><small>{{lesson.day|date:"d M"}}</small></small></h4>
+  <hr>
+  {% if request.user.is_staff or request.user.profile.face == "T" %}
+    <div class="bs-callout bs-callout-warning">
+      <h4>Внимание!</h4>
+      1) Отправив пустой запрос, учитывается присутвсие всех студентов.
+      <br>
+      2) Повторный запрос перепишет предыдущий. И последний из них будет актуален.
+    </div>
+  	<form method="POST" action="{% url 'put_attendance' lesson.id %}" class="absent-form">
+      {% csrf_token %}
+      <input name="absent" id="select-to" type="text" autocomplete="off" tabindex="" id="select-to-selectized" style="width: 100%; opacity: 1; position: relative; left: 0px;" placeholder="Выбор отсутсвующих"> 
+    </form>
+    <button class="btn btn-primary mt-1 float-xs-right sent-absent">Отправить</button>
+  {% else %}
+  	<p>Вам сюда нельзя!</p>
+  {% endif %}
+  </div>
+{% endblock content %}
+{% block scripts %}
+  <script type="text/javascript" src="{% static 'js/selectize.min.js' %}"></script>
+  <script type="text/javascript">
+    $('#select-to').selectize({
+        persist: false,
+        maxItems: null,
+        valueField: 'username',
+        labelField: 'name',
+        plugins: ['remove_button'],
+        searchField: ['name', 'username'],
+        options: [
+          {% for student in students %}
+            {username: '{{student.username}}', name: '{{student.get_full_name|default:student.username}}'},      
+          {% endfor %}
+        ],
+        render: {
+            item: function(item, escape) {
+                return '<div>' +
+                    (item.name ? '<span class="name">' + escape(item.name) + ' </span>' : '') +
+                '</div>';
+            },
+            option: function(item, escape) {
+                var label = item.name || item.username;
+                var caption = item.name ? item.username : null;
+                return '<div>' +
+                    '<span class="label">' + escape(label) + ' </span>' +
+                    (caption ? '<span class="caption">@' + escape(caption) + '</span>' : '') +
+                '</div>';
+            }
+        },
+    });
+    $(".sent-absent").on("click",function(){
+      $(this).attr("disabled",true)
+      $(".absent-form").submit();
+    });
+  </script>
+{% endblock scripts %}

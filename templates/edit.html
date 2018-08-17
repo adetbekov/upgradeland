@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load url_tags %}
+{% load crispy_forms_tags %}
+{% block title %}Редактирование профиля{% endblock %}
+{% block content %}
+  <style type="text/css">
+    .alert-danger li{
+      list-style:none;
+    }
+    .alert-danger ul{
+      padding: 0px;
+      margin-bottom: 0px;
+    }
+  </style>
+  <style type="text/css">
+    .alert-danger{
+      list-style:none;
+      padding: 10px;
+      margin-bottom: 0px;
+    }
+    .activate_back{
+      background: url("{% static 'images/activate.jpg' %}") repeat center center fixed;
+      background-size: cover;
+      height: 38vh; 
+      z-index: -100;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+      -webkit-transform : rotate(5deg) scale(1.5); 
+      -ms-transform     : rotate(5deg) scale(1.5); 
+      transform         : rotate(5deg) scale(1.5);
+    } 
+    @media screen and (max-width: 765px){
+      .activate_back{
+        -webkit-transform : rotate(0deg) scale(1); 
+        -ms-transform     : rotate(0deg) scale(1); 
+        transform         : rotate(0deg) scale(1);
+      }
+    }
+    .activate_block{
+      margin-top: 10vh;
+    }
+    .activate_block > div{
+        box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+    }
+    #div_id_birth > div{
+      display: flex;
+    }
+  </style>
+  <div class="card card-block row">
+  <h4>Редактирование профиля</h4>
+  <hr>
+    <div class="mb-1 clearfix">
+      <div class="float-xs-left mr-1 offset-xs-3 offset-sm-0">{% include "avatar.html" with src=user.profile.image width="80px" height="80px"%}</div>
+      <div class="float-xs-left">
+        <p class="mb-0"><small>Имя:</small> <b>{{user.get_full_name|default:user.username}}</b></p>
+        <p class="mb-0"><small>Логин:</small> <a href="{% url 'profile' user.id %}">@{{user.username}}</a></p>
+        <p class="mb-0"><small>Статус:</small> {{user.profile.get_face_display}}</p>
+      </div>
+    </div>
+    {% if saved %}
+      <div class="alert alert-success" role="alert">
+        <strong>Данные</strong> сохранены успешно!
+      </div>
+    {% endif %}
+    <ul class="nav nav-tabs" role="tablist">
+      {% if profile %}
+        <li class="nav-item">
+          <a class="nav-link active" data-toggle="tab" href="#profile" role="tab">Профиль</a>
+        </li> 
+      {% endif %}
+      <li class="nav-item">
+        <a class="nav-link {% if form_active %}active{% endif %}" data-toggle="tab" href="#second" role="tab">Email и пароль</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      {% if profile %}
+      <div class="tab-pane active" id="profile" role="tabpanel">
+        <br>
+        <form method="POST" action="{% url 'editprofile' %}" enctype="multipart/form-data">
+          {% csrf_token %}
+          {{profile|crispy}}
+          <button class="btn btn-success float-xs-right mt-1"><i class="fa fa-check"></i> Сохранить</button>
+        </form>
+      </div>
+      {% endif %}
+      <div class="tab-pane {% if form_active %}active{% endif %}" id="second" role="tabpanel">          
+        <br>
+        <form method="POST" action="{% url 'edituser' %}">
+          {% csrf_token %}
+          {{form|crispy}}
+          <button class="btn btn-success float-xs-right mt-1"><i class="fa fa-check"></i> Сохранить</button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

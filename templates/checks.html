@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load lessons %}
+{% block title %}Проверка чеклистов д.з - {{lesson.name}}{% endblock %}
+{% block content %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/selectize.css' %}" />
+  <div class="card card-block row">
+  <h4><a href="{{cabinet_url}}"><i class="fa fa-chevron-left"></i> Назад</a>&nbsp;&nbsp; Проверка чеклистов д.з <b>{{lesson.name}}</b><small class="float-xs-right text-muted"><small>{{lesson.day|date:"d M"}}</small></small></h4>
+  <hr>
+  {% open_lesson request.user.id lesson.id as open %}
+  {% if open %}
+    <div id="accordion" role="tablist" aria-multiselectable="true">
+      <div class="card">
+        <div class="card-header" role="tab" id="headingOne">
+          <h5 class="mb-0">
+            <a class="text-warning" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+              Непроверенные <small>({{unchecked|length}})</small>
+            </a>
+          </h5>
+        </div>
+
+        <div id="collapseOne" class="collapse show in" role="tabpanel" aria-labelledby="headingOne">
+          <div class="card-block">
+            <div class="flex-container flex-wrap">
+              {% for u in unchecked %}
+                <div class="flex-item pr-1 pb-1 ttip"><a href="{% url 'checklist' lesson.id u.id %}">{% include "avatar.html" with src=u.profile.image style="border:3px solid #f39c12;" %}<div class="badge_count float-xs-right">{{u.count}}</div></a><span class="ttiptext ttip-bottom">{{u.get_full_name|default:u.username}}</span></div>
+              {% empty %}
+                Пусто
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header" role="tab" id="headingTwo">
+          <h5 class="mb-0">
+            <a class="collapsed text-success" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+              Подтвержденные <small>({{checked|length}})</small>
+            </a>
+          </h5>
+        </div>
+        <div id="collapseTwo" class="collapse" role="tabpanel" aria-labelledby="headingTwo">
+          <div class="card-block">
+            <div class="flex-container flex-wrap">
+              {% for u in checked %}
+                <div class="flex-item pr-1 pb-1 ttip"><a href="{% url 'checklist' lesson.id u.id %}">{% include "avatar.html" with src=u.profile.image style="border:3px solid #2ecc71;" %}<div class="badge_success float-xs-right">{{u.count}}</div></a><span class="ttiptext ttip-bottom">{{u.get_full_name|default:u.username}}</span></div>
+              {% empty %}
+                Пусто
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+  	<p>Вам сюда нельзя!</p>
+  {% endif %}
+  </div>
+{% endblock content %}

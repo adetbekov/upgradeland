@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load posts %}
+{% block title %}Лента{% endblock %}
+{% block content %}
+<div class="card card-block row">
+	<form enctype="multipart/form-data" class="formpost" action="{% url 'createpost' %}" method="POST">
+		{% csrf_token %}
+		<div class="form-group col-md-12 mx-0 px-0 mb-0">
+	    	<textarea name="content" class="form-control" id="exampleTextarea" rows="3" placeholder="Что нового?"></textarea>
+	  	</div>
+	  	<div class="mx-0 px-0">
+		  	<label class="btn btn-outline-success btn-file mt-1 mb-0 float-md-left float-xs-left">
+	    		<i class="fa fa-camera"></i> <input name="image" type="file" class="hidden-xs-up">
+			</label>
+	</form>
+		<button class="btn btn-outline-primary mt-1 mb-0 float-md-right float-xs-right sendpost">
+	    	Отправить
+	  	</button>
+  	</div>
+  	<p class="filename text-success mt-1 ml-1 float-md-left"></p>
+</div>
+<div class="row">
+	{% for post in posts %}
+		<div class="card col-md-12" id="post-{{post.id}}">
+		  <div class="card-block sticker0" style="background-color: white;">
+		  	{% include "avatar.html" with class="float-xs-left mr-1" src=post.user.profile.image %}
+		    <h4 class="card-title"><a href="{% url 'profile' post.user.id %}">{{post.user.get_full_name|default:post.user}}</a>
+			{% if post.user == request.user or request.user.is_staff %}
+				<form action="{% url 'hidepost' %}" method="POST" class="float-xs-right">
+					{% csrf_token %}
+					<input name="post" type="text" class="hidden-xs-up" value="{{post.id}}">
+			    	<button type="submit" class="close" data-dismiss="modal" aria-label="Close">
+		          		<span aria-hidden="true">&times;</span>
+		        	</button>
+	        	</form>
+			{% endif %}
+	        </h4>
+		    <h6 class="card-subtitle text-muted">{{post.created}}</h6>
+		  </div>
+		  {% if post.image %}
+		  	<img class="halfimage mx-auto d-block" src="{{post.image.url}}" alt="Post image {{post.id}}">
+		  	<div class="card-block">
+		  {% else %}
+		  	<div class="card-block mt-0 pt-0">
+		  {% endif %}
+		    <span class="card-text ma-0 pa-0">{{post.content|linebreaks}}</span>
+		    <hr>
+		    <button id="{{post.id}}" class="btn btn-link pl-0 text-muted like {% postliked request.user.id post.id %}"><i class="fa fa-heart"></i> <span class="hidden-sm-down">Мне нравится</span> <span class="count"> {% postlikes post.id %}</span></button>
+		    {# <a href="#" class="card-link text-muted"><i class="fa fa-comment"></i> <span class="hidden-sm-down">Комментарии</span></a> #}
+		    <button type="button" class="btn btn-link text-muted pl-0 comment {% postcommented request.user.id post.id %}" data-toggle="modal" data-target="#commentModal" data-id="{{post.id}}"><i class="fa fa-comment"></i> <span class="hidden-sm-down">Комментарии</span> <span class="comments_count">{% postcomments post.id %}</span></button>
+		  </div>
+		</div>
+	{% empty %}
+		<p>Постов нет :(</p>
+	{% endfor %}
+	<ul id="alt-style-pagination" class="pagination simple-pagination py-0 my-1"></ul>
+</div>
+{% endblock %}
+{% block scripts %}
+	<div class="modal fade" id="commentModal" tabindex="1003" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-lg" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title float-xs-left" id="commentModalLabel">Комментарий</h5>
+	        <button type="button" class="close float-xs-right" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	      	<div class="post-view"></div>
+	        <div class="row">
+		        <form class="col-lg-10 col-md-9 mr-0">
+		            <textarea class="form-control" id="comment" placeholder="Написать комментарий"></textarea>
+		        </form>
+	        	<div class="col-lg-2 col-md-3 col-xs-6 ml-0 pl-0 float-xs-right">
+        			<button class="btn btn-outline-primary btn-sm mt-1 float-md-right float-xs-right sendcomment btn-block" data-id="">
+        		    	<i class="fa fa-send"></i> Отправить
+        		  	</button>
+	        	</div>
+	        </div>
+	      </div>
+	      <div class="modal-body pt-0">
+	      	<h4>Комментарий:</h4>
+	      	<div class="post-comments"></div>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+    <script type="text/javascript">
+    	$('#alt-style-pagination').pagination({
+            items: {{num_pages}},
+            itemOnPage: 8,
+            currentPage: {{page}},
+            cssStyle: '',
+            prevText: '<span aria-hidden="true">&laquo;</span>',
+            nextText: '<span aria-hidden="true">&raquo;</span>',
+            onInit: function () {
+                // fire first page loading
+            },
+            onPageClick: function (page, evt) {
+                open("{% url 'feed' %}"+page,"_self");
+            }
+        });
+      	$(function() {
+         	$("input:file").change(function (){
+           		var fileName = "Выбран файл <i class='fa fa-check'></i>";
+           		$(".filename").html(fileName);
+         	});
+     	});
+     	$(".sendpost").on("click", function(e){
+     		$(this).attr("disabled", true);
+     		$(".formpost").submit();
+     	});
+     	$(".sendcomment").on("click", function(e){
+     		$(this).attr("disabled", true);
+     		var id = $(this).data('id') 
+     		console.log(id);
+     		$.ajax({
+	      		url: "{% url 'createcomment' %}",
+	        	type: "GET",
+	        	data: {"comment": $("#comment").val(),"post":id},
+	        	success: function (data) {
+	        		$.ajax({
+			      		url: "{% url 'postcomments' %}",
+			        	type: "GET",
+			        	data: {"post": id},
+			        	success: function (data) {
+			        		$(".post-comments").html(data.content);
+			        	},
+			    	});
+			    	$("#comment").val('');
+			    	$(".sendcomment").attr("disabled", false);
+			    	if(data.content.count!=null){
+				    	$(".comment[data-id="+id+"]").addClass("text-primary").removeClass("text-muted");
+				    	$(".comment[data-id="+id+"] .comments_count").text(data.content.count);
+			    	}
+	        	},
+	    	});
+     	});
+     	$('#commentModal').on('show.bs.modal', function (event) {
+		  var button = $(event.relatedTarget) 
+		  var id = button.data('id') 
+		  var modal = $(this)
+		  modal.find('.modal-title').text('Комментарии поста #' + id)
+		  modal.find('.modal-body input').val(id)
+		  modal.find('.modal-body .sendcomment').attr("data-id",id);
+		  $(".post-view").empty();
+		  $( "#post-"+id ).children().clone().appendTo( ".post-view" );
+		  $(".post-view").find(".close").remove();
+
+
+
+		  	$.ajax({
+	      		url: "{% url 'postcomments' %}",
+	        	type: "GET",
+	        	data: {"post": id},
+	        	success: function (data) {
+	        		$(".post-comments").html(data.content);
+	        	},
+	    	});
+
+
+
+
+
+		  $(".post-view").find(".like").on("click", function (e) {
+		  	var id = $(this).attr('id');
+		  	$(this).attr("disabled", true);
+		      $.ajax({
+		      	url: "{% url 'likepost' %}",
+		        	type: "GET",
+		        	data: {"post": id},
+		        	success: function (data) {
+		        		if(data.content.liked == true){
+		        			$(".like[id$="+id+"]").addClass("text-danger").removeClass("text-muted");
+		        			$(".post-view").find(".like[id$="+id+"]").addClass("text-danger").removeClass("text-muted");
+		        		}else{
+			          		$(".like[id$="+id+"]").removeClass("text-danger").addClass("text-muted");
+			          		$(".post-view").find(".like[id$="+id+"]").removeClass("text-danger").addClass("text-muted");
+			  			};
+		  			if(data.content.count==0){
+		  				$(".like[id$="+id+"]").find(".count").html("");
+		  				$(".post-view").find(".like[id$="+id+"]").find(".count").html("");
+		  			}else{
+		  				$(".like[id$="+id+"]").find(".count").html(data.content.count);
+		  				$(".post-view").find(".like[id$="+id+"]").find(".count").html(data.content.count);
+		  			}
+		  			$(".like[id$="+id+"]").attr("disabled", false);
+		  			$(".post-view").find(".like[id$="+id+"]").attr("disabled", false);
+		        	},
+		    	});
+		  });
+		});
+		$(".like").on("click", function (e) {
+			var id = $(this).attr('id');
+			$(this).attr("disabled", true);
+		    $.ajax({
+		    	url: "{% url 'likepost' %}",
+		      	type: "GET",
+		      	data: {"post": id},
+		      	success: function (data) {
+		      		// console.log(e.currentTarget);
+		      		if(data.content.liked == true){
+		      			$(".like[id$="+id+"]").addClass("text-danger").removeClass("text-muted");
+		      		}else{
+		        		$(".like[id$="+id+"]").removeClass("text-danger").addClass("text-muted");
+					};
+					if(data.content.count==0){
+						$(".like[id$="+id+"]").find(".count").html("");
+					}else{
+						$(".like[id$="+id+"]").find(".count").html(data.content.count);
+					}
+					$(".like[id$="+id+"]").attr("disabled", false);
+		      	},
+		  	});
+		});
+    </script>
+{% endblock scripts %}

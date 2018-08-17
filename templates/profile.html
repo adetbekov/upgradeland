@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load lessons %}
+{% load url_tags %}
+{% load lessons %}
+{% load hw %}
+{% load posts %}
+{% load board %}
+{% block title %}{% if user %}{{user.get_full_name|default:user.username}}{% else %}Пользователь не найден!{% endif %}{% endblock %}
+{% block content %}
+	<style type="text/css">
+		.pdding td, .pdding th{
+			padding-bottom: 10px; 
+		}
+	</style>
+  {% if user %}
+	<div class="card card-block row">
+		<div class="col-md-4 col-sm-3 col-xs-6 offset-xs-3 offset-sm-0">{% include "avatar.html" with src=user.profile.image width="100%" height="auto" %}
+		<div class="w-100 flex-container flex-wrap mt-1 hidden-sm-down">	
+		<div class="btn-group btn-group-sm flex-item" role="group" aria-label="Basic example">
+			  <button type="button" class="btn btn-secondary"><i class="fa fa-heart"></i> {% likes_of_user_count user.id %}</button>
+			  <button type="button" class="btn btn-secondary"><i class="fa fa-bullhorn"></i> {% posts_of_user_count user.id %}</button>
+			  <button type="button" class="btn btn-secondary"><i class="fa fa-newspaper-o"></i> {% boards_of_user_count user.id %}</button>
+		</div>
+		</div>
+		</div>
+		<div class="w-100 flex-container flex-wrap pt-1 hidden-md-up">	
+		<div class="btn-group flex-item" role="group" aria-label="Basic example">
+			  <button type="button" class="btn btn-secondary"><i class="fa fa-heart"></i> {% likes_of_user_count user.id %}</button>
+			  <button type="button" class="btn btn-secondary"><i class="fa fa-bullhorn"></i> {% posts_of_user_count user.id %}</button>
+			  <button type="button" class="btn btn-secondary"><i class="fa fa-newspaper-o"></i> {% boards_of_user_count user.id %}</button>
+		</div>
+		</div>
+		<div class="mt-2 col-md-8 col-sm-9 col-xs-12">
+			<table class="borderless w-100">
+			  <tbody class="pdding">
+			    <tr>
+			      <td scope="row"><b><small><i class="fa fa-user"></i>&nbsp; &nbsp;</small></b></td>
+			      <td><b>{{user.get_full_name|default:user.username}}</b> <a href="{% url 'profile' user.id %}">@{{user.username}}</a></td>
+			    </tr>
+			    {% if request.user.is_superuser %}
+			    	<tr>
+			    	  <td></td>
+			    	  {% if not user.profile.ended %}
+			    	  	<td><a class="btn btn-sm btn-outline-warning" href="{% url 'endcourse' user.id %}" style="margin-top:5px;"><i class="fa fa-minus-circle"></i> Завершить</a>&nbsp; &nbsp;<a class="btn btn-sm btn-outline-danger" href="{% url 'delete' user.id %}" style="margin-top:5px;"><i class="fa fa-times"></i> Удалить</a></td>
+			    	  {% else %}
+			    	  	<td><a class="btn btn-sm btn-outline-success" href="{% url 'reanimate' user.id %}" style="margin-top:5px;"><i class="fa fa-undo"></i> Вернуть назад</a></td>
+			    	  {% endif %}
+			    	</tr>
+			    {% endif %}
+			    <tr>
+			      <th scope="row"><b><small><i class="fa fa-thumbs-up"></i></small></b></th>
+			      <td>{{user.profile.helpful}}</td>
+			    </tr>
+			    <tr>
+			      <th scope="row"><b><small><i class="fa fa-university"></i></small></b></th>
+			      <td>{{user.profile.university}}</td>
+			    </tr>
+			    <tr>
+			      <th scope="row"><b><small><i class="fa fa-certificate"></i></small></b></th>
+			      <td>{{user.profile.get_face_display}}</td>
+			    </tr>
+			    <tr>
+			      <th scope="row"><b><small><i class="fa fa-calendar"></i></small></b></th>
+			      <td>{{user.profile.birth}}</td>
+			    </tr>
+			    <tr>
+			      <th scope="row"><b><small><i class="fa fa-phone"></i></small></b></th>
+			      <td>{{user.profile.phone}}</td>
+			    </tr>
+			    <tr>
+			      <th scope="row"><b><small><i class="fa fa-envelope"></i></small></b></th>
+			      <td>{{user.email}}</td>
+			    </tr>
+			    {% if user.profile.ended %}
+				    <tr>
+				      <th scope="row"><b><small><i class="fa fa-flag"></i></small></b></th>
+				      <td>{{user.profile.ended}}</td>
+				    </tr>
+			    {% endif %}
+			    </tbody>
+			</table>
+			<table class="borderless w-100">
+				<tbody>
+			    {% for stream in streams %}
+			    	<tr>
+			    	  <th scope="row"><b><small><i class="fa fa-users"></i></small></b></th>
+			    	  <td><b>&nbsp;&nbsp;{{forloop.counter}}. Успеваемость в потоке "{{stream.name}}":</b></td>
+			    	</tr>
+			    	<tr>
+			    		<th scope="row"></th>
+			    		<td class="pt-1"><div class="card text-white p-1" style="background-color:#34495e;">
+			    			<table>
+			    				<tr>
+			    					<td><small><i class="fa fa-list-ol"></i></small>&nbsp;</td>
+			    					<td>Кол-во посещений:&nbsp; &nbsp;</td>
+			    					<td>{% get_attended_count user.id stream.id %} / {% get_lessons_count stream.id %}</td>
+			    				</tr>
+			    				<tr>
+			    					<td><small><i class="fa fa-times"></i></small>&nbsp;</td>
+			    					<td>Кол-во отсутствий:&nbsp; &nbsp;</td>
+			    					<td>{% get_absent_count user.id stream.id %}</td>
+			    				</tr>
+			    				<tr>
+			    					<td><small><i class="fa fa-check-circle"></i></small>&nbsp;</td>
+			    					<td>Выполнение д.з:&nbsp; &nbsp;</td>
+			    					<td>{% accepted_percentage user.id stream.id %} / {% checked_percentage user.id stream.id %} %</td>
+			    				</tr>
+			    			</table>
+			    		</div></td>
+			    	</tr>
+			    	<tr>
+			    	  <th scope="row"></th>
+			    	  <td class="flex-container flex-wrap">
+			    	  	{% get_attendance user.id stream.id as atendances %}
+			    	  	{% for attendance in atendances %}
+			    	  		<a class="flex-item pr-1 pb-1 ttip profile_lessons" href="{% url 'attendance' attendance.lesson.id %}"><div class="circlemask {% if attendance.attended %}bg-primary{% else %}bg-danger{% endif %}" style="width:50px;height:50px;padding-top:13px;"><p class="text-xs-center"><b>{% get_task_persentage user.id attendance.id %}%</b></p></div><span class="ttiptext ttip-bottom">{{attendance.lesson.name}}</span></a>
+			    	  	{% empty %}
+			    	  		<p>Нет посещений!</p>
+			    	  	{% endfor %}
+			    	  </td>
+			    	</tr>
+			    {% endfor %}
+			  </tbody>
+			</table>
+			<table class="borderless w-100">
+				<tbody>
+					<tr>
+						<td scope="row"><b><small><i class="fa fa-user-plus"></i></small></b></td>
+						<td>5 полезных контактов:</td>
+					</tr>
+					<tr>
+						<td scope="row"></td>
+						<td class="pt-1">
+							<div id="accordion" role="tablist" aria-multiselectable="true">
+							{% for contact in contacts %}
+							  <div class="card">
+							    <div class="card-header" role="tab" id="headingOne">
+							      <h6 class="mb-0">
+							        <a class="text-primary" data-toggle="collapse" data-parent="#accordion" href="#collapse{{forloop.counter}}" aria-expanded="true" aria-controls="collapse{{forloop.counter}}">
+							          {{forloop.counter}}. {{contact.name}} <small><small class="float-xs-right text-muted" style="margin-top:5px;">{{contact.helpful}}</small></small>
+							        </a>
+							      </h6>
+							    </div>
+
+							    <div id="collapse{{forloop.counter}}" class="collapse show" role="tabpanel" aria-labelledby="heading{{forloop.counter}}">
+							      <div class="card-block">
+							          <p>Контакт: {{contact.contact}}</p>
+							          <em>{{contact.comment}}</em>
+							      </div>
+							    </div>
+							  </div>
+							  {% endfor %}
+							</div>
+							<ol>
+							</ol>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+  {% else %}
+  	<div class="card card-block row">
+	  <div class="alert alert-danger mb-0" role="alert">
+	    Пользователь <strong>#{{id}}</strong> не найден!
+	  </div>
+	</div>
+  {% endif %}
+{% endblock content %}

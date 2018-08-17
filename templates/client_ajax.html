@@ -1,0 +1,16 @@
+{% load staticfiles %}
+<style type="text/css">
+	.style:before{
+		content: "";
+		display: block;
+		padding-top: 100%;
+	}
+</style>
+{% for friend in users %}
+    <li class="row pl-1 mt-1">
+    	<div class="style circlemask float-xs-left mr-1" style="background-image: url({% if friend.profile.image %}{{friend.profile.image.url}}{% else %}{% static 'images/user.png' %}{% endif %});width:50px; height:50px;">
+    	</div>
+        <a login="{{friend.username}}" href="{% url 'profile' friend.id %}" class="click_client float-xs-left pt-1">{{ friend.get_full_name }}  <span>@{{friend.username}}</span></a>
+    </li>
+    {% empty %}
+{% endfor %}

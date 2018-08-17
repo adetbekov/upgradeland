@@ -1,0 +1,191 @@
+{% load staticfiles %}
+{% load url_tags %}
+{% load rating %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>{% block title %}{% endblock %} | Upgrade Land</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/simple-sidebar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/simplepagination.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  </head>
+  <body>
+    <nav class="navbar navbar-light bg-faded">
+      <a class="navbar-brand" href="{% url 'index' %}">
+        <img src="{% static 'images/logo.png' %}" height="30" class="d-inline-block align-top" alt="Upgrade Land">
+        Upgrade Land
+      </a>
+      {% if request.user.is_authenticated %}
+        <button class="navbar-toggler hidden-sm-up float-xs-right" type="button" data-toggle="collapse" data-target="#navbarResponsive1" aria-expanded="false" aria-label="Toggle navigation"></button>
+        <ul class="nav navbar-nav hidden-xs-down float-xs-right">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              {{request.user.get_full_name}}
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+              <a class="dropdown-item" href="{% url 'profile' request.user.id %}"><i class="fa fa-user"></i>&ensp; Мой профиль</a>
+              <a class="dropdown-item" href="{% url 'edit' %}"><i class="fa fa-pencil"></i>&ensp; Редактировать данные</a>
+              {% if request.user.is_staff %}
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="{% url 'reg' %}"><i class="fa fa-plus"></i>&ensp; Регистрация</a>
+                <a class="dropdown-item" href="{% url 'all' %}"><i class="fa fa-users"></i>&ensp; Все пользователи</a>
+                <a class="dropdown-item" href="{% url 'admin:index' %}"><i class="fa fa-tachometer"></i>&ensp; Панель управления</a>
+              {% endif %}
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-outline-primary" href="{% url 'logout' %}">Выход</a>
+          </li>
+        </ul> 
+    </nav>
+    {% endif %}
+    {% if request.path|get_path:2 == '/activate/' %}
+    <div id="page-content-wrapper" class="pt-0">
+        <div class="container-fluid full mt-0 pt-0">
+          {% block additional %}{% endblock additional %}
+        </div>
+    </div>  
+    {% elif request.user.is_authenticated %}
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="offset-lg-1 col-lg-2 col-md-3 col-sm-4">
+              <nav class="nav nav-pills nav-stacked sticker">
+                <div class="collapse navbar-toggleable-xs" id="navbarResponsive1">
+                  {% url "feed" as feed_url %}
+                  {% url "cabinet" as cabinet_url %}
+                  {% url "board" as board_url %}
+                  {% url "rating" as rating_url %}
+                  {% url "library" as library_url %}
+                  {% url "events" as calendar_url %}
+                  {% url "faq" as faq_url %}
+                  {% url "plan" as plan_url %}
+                  <a class="nav-link {% if request.path|get_path:1 == feed_url %}active{% endif %}" href="{{feed_url}}"><i class="fa fa-home"></i>&ensp;Лента</a>
+                  <a class="nav-link {% if request.path|get_path:1 == cabinet_url %}active{% endif %}" href="{{cabinet_url}}"><i class="fa fa-tasks"></i>&ensp;Мой кабинет</a>
+                  <a class="nav-link {% if request.path|get_path:1 == plan_url %}active{% endif %}" href="{{plan_url}}"><i class="fa fa-check-square-o"></i>&ensp;План "Выстрел"</a>
+                  <a class="nav-link {% if request.path|get_path:1 == board_url %}active{% endif %}" href="{{board_url}}"><i class="fa fa-newspaper-o"></i>&ensp;Доска объявлений</a>
+                  <a class="nav-link {% if request.path|get_path:1 == calendar_url %}active{% endif %}" href="{{calendar_url}}"><i class="fa fa-calendar"></i>&ensp;Календарь событий</a>
+                  <a class="nav-link {% if request.path|get_path:1 == library_url %}active{% endif %}" href="{{library_url}}"><i class="fa fa-book"></i>&ensp;База знаний</a>
+                  <a class="nav-link {% if request.path|get_path:1 == rating_url %}active{% endif %}" href="{{rating_url}}"><i class="fa fa-star-o"></i>&ensp;Рейтинги</a>
+                  <a class="nav-link {% if request.path|get_path:1 == faq_url %}active{% endif %}" href="{{faq_url}}"><i class="fa fa-question-circle-o"></i>&ensp;Вопрос-ответ</a>
+                  <li class="nav-item dropdown hidden-sm-up">
+                    <a class="nav-link dropdown-toggle" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      {{request.user.get_full_name}}
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                      <a class="dropdown-item" href="{% url 'profile' request.user.id %}"><i class="fa fa-user"></i>&ensp; Мой профиль</a>
+                      <a class="dropdown-item" href="{% url 'edit' %}"><i class="fa fa-pencil"></i>&ensp; Редактировать данные</a>
+                      {% if request.user.is_staff %}
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{% url 'reg' %}"><i class="fa fa-plus"></i>&ensp; Регистрация</a>
+                        <a class="dropdown-item" href="{% url 'all' %}"><i class="fa fa-users"></i>&ensp; Все пользователи</a>
+                        <a class="dropdown-item" href="{% url 'admin:index' %}"><i class="fa fa-tachometer"></i>&ensp; Панель управления</a>
+                      {% endif %}
+                    </div>
+                  </li>
+                  <a class="nav-link hidden-sm-up" href="{% url 'logout' %}">Выход</a>
+                </div>
+              </nav>
+            </div>
+            <div class="
+            {% if request.path|get_path:1 != calendar_url %}
+              {% if request.path|get_path:1 == library_url and request.path|get_path:2 != "//" %}
+                col-lg-8 col-md-9 col-sm-8
+              {% else %}
+                col-lg-5 col-md-6 col-sm-8
+              {% endif %}
+            {% else %}
+              col-lg-8 col-md-9 col-sm-8
+            {% endif %}">
+              {% block content %}{% endblock content %}
+            </div>
+
+
+
+            <div class="col-lg-3 col-md-3 col-sm-3 offset-sm-4 offset-md-0 col-sm-8 col-xs-12 px-sm-0 
+            {% if request.path|get_path:1 == calendar_url %}
+              hidden-sm-up
+            {% endif %}
+            {% if request.path|get_path:1 == library_url and request.path|get_path:2 != "//"  %}
+              hidden-sm-up
+            {% endif %}">
+              <div class="card text-center">
+                <div class="card-block card-inverse card-primary rounded-top" >
+                  <blockquote class="card-blockquote">
+                    {% include "avatar.html" with class="mx-auto mb-1" width="100px" height="100px" src=request.user.profile.image %}
+                    <h4 class="text-xs-center"><a class="text-white" href="{% url 'profile' request.user.id %}">{{request.user.get_full_name}}</a></h4>
+                    <footer class="text-xs-center">{{request.user.profile.helpful}} &bull; {{request.user.profile.university}}</footer>
+                  </blockquote>
+                </div>
+                <div class="card-block">
+                  <h5 class="card-title">Рейтинг студентов</h5>
+                  <ol class="px-md-1 px-sm-2">
+                    {% rates as top %}
+                    {% for u in top %}
+                      <li><a href="{% url 'profile' u.id %}">{{u.get_full_name|default:u.username}}</a></li>
+                    {% endfor %}
+                  </ol>
+                  <a class="float-xs-right" href="{{rating_url}}">Весь список</a>
+                  {% lastrate as ratedate %}
+                  <p class="card-text"><small class="text-muted">Выставлен {{ ratedate |date:'d M Y' }}</small></p>
+                </div>
+              </div>
+              <!--
+              <div class="card">
+                <div class="card-footer hidden-md-up text-xs-center">
+                  <small class="text-muted"><a href="http://upgradeschool.kz">{% now "Y" %} Upgrade School ©</a><a href="https://www.instagram.com/adetbekovv/"> Adetbekov Creative Studio</a></small>
+                </div>
+              </div>
+              -->
+            </div>
+
+
+
+
+          </div>
+        </div>
+    </div>
+
+
+    
+
+
+    {% else %}
+    </nav>
+    <div id="page-content-wrapper">
+        <div class="container">
+          {% block index %}{% endblock index %}
+        </div>
+    </div>
+    {% endif %}
+    <!--
+    <footer class="hidden-md-down footer">
+      <div class="container">
+        <div class="text-xs-center">
+        <a href="http://upgradeschool.kz">{% now "Y" %} Upgrade School ©</a>
+        <a href="https://www.instagram.com/adetbekovv/"> Adetbekov Creative Studio</a>
+        </div> 
+      </div>
+    </footer>
+    -->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/gsap/TweenMax.min.js' %}"></script>
+    <script src="{% static 'js/simplepagination.js' %}"></script>
+    <script src="{% static 'js/tether.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/jquery.sticky.js' %}"></script>
+    {% block scripts %}{% endblock scripts %}
+    <script>
+      $(document).ready(function(){
+        if($(document).width()>576){
+          $(".sticker").sticky({topSpacing:16});
+        }
+      });
+    </script> 
+  </body>
+</html>

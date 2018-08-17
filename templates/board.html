@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load lessons %}
+{% load url_tags %}
+{% block title %}Доска объявлений{% endblock %}
+{% block content %}
+  <style type="text/css">
+
+      @media (min-width: 34em) {
+          .card-columns {
+              -webkit-column-count: 2;
+              -moz-column-count: 2;
+              column-count: 2;
+          }
+      }
+
+      @media (min-width: 48em) {
+          .card-columns {
+              -webkit-column-count: 1;
+              -moz-column-count: 1;
+              column-count: 1;
+          }
+      }
+
+      @media (min-width: 62em) {
+          .card-columns {
+              -webkit-column-count: 2;
+              -moz-column-count: 2;
+              column-count: 2;
+          }
+      }
+
+      @media (min-width: 100em) {
+          .card-columns {
+              -webkit-column-count: 3;
+              -moz-column-count: 3;
+              column-count: 3;
+          }
+      }
+
+  </style>
+  <div class="card card-block row">
+    <h4>Добавить объявление:</h4>
+    <br>
+    <form enctype="multipart/form-data" class="formpost" action="{% url 'createboard' %}" method="POST">
+      {% csrf_token %}
+      <div class="form-group col-md-12 mx-0 px-0 mb-0">
+          <input name="title" class="form-control mb-1" placeholder="Заголовок"/>
+          <textarea name="content" class="form-control" id="exampleTextarea" rows="2" placeholder="Описание"></textarea>
+        </div>
+    </form>
+      <button class="btn btn-outline-primary mt-1 mb-0 float-md-right float-xs-right sendpost">
+          <i class="fa fa-plus"></i> Добавить
+        </button>
+      <p class="filename text-success mt-1 ml-1 float-md-left"></p>
+  </div>
+  <div class="card card-block row">
+  <h4>Доска объявлений</h4>
+  <hr>
+  {% student_access request.user.id as student %}
+  {% if student %}
+    <div class="card-columns">
+      {% for board in boards %}
+        <div class="card text-center">
+          <div class="card-block">
+            <h4 class="card-title">{{board.title}}
+                {% if board.user == request.user or request.user.is_staff %}
+                  <form action="{% url 'hideboard' %}" method="POST" class="float-xs-right">
+                    {% csrf_token %}
+                    <input name="b" type="text" class="hidden-xs-up" value="{{board.id}}">
+                    <button type="submit" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </form>
+                {% endif %}
+            </h4>
+            <p class="card-text">{{board.content}}</p>
+            <p class="card-text float-xs-right"><small class="text-muted"><small>{{board.created|date:"h:m d M"}}</small> - <a href="{% url 'profile' board.user.id %}">{{board.user.get_full_name|default:board.user.username}}</a></small></p>
+          </div>
+        </div>
+      {% empty %}
+        <p>Пусто!</p>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>Вам сюда нельзя!</p>
+  {% endif %}
+  </div>
+{% endblock content %}
+{% block scripts %}
+  <script type="text/javascript">
+    $(".sendpost").on("click", function(e){
+      $(this).attr("disabled", true);
+      $(".formpost").submit();
+    });
+  </script>
+{% endblock %}

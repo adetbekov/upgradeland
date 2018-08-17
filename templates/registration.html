@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load url_tags %}
+{% load crispy_forms_tags %}
+{% block title %}Регистрация{% endblock %}
+{% block content %}
+  <style type="text/css">
+    .alert-danger li{
+      list-style:none;
+    }
+    .alert-danger ul{
+      padding: 0px;
+      margin-bottom: 0px;
+    }
+  </style>
+  <div class="card card-block row">
+  <h4>Регистрация</h4>
+  <hr>
+  {% admin_access request.user.id as open %}
+  {% if open %}
+  	<form method="POST" action="{% url 'reg' %}">
+      {% csrf_token %}
+      {{form|crispy}}
+      {{profile|crispy}}
+      <button class="btn btn-primary float-xs-right mt-1">Зарегистрировать</button>
+    </form>
+  {% else %}
+  	<p>Ах ты хитрец :) Но доступа ты не получишь!</p>
+  {% endif %}
+  </div>
+{% endblock content %}

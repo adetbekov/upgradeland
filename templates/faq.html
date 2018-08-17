@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load url_tags %}
+{% block title %}Вопрос-ответ{% endblock %}
+{% block content %}
+	<style>
+		/*@import url(http://fonts.googleapis.com/css?family=Montserrat:400,700);*/
+		section{
+		  /*padding: 10% 20%;*/
+		  /*margin: 0 auto;*/
+		}
+		.animate{
+		  transition: all .3s;
+		  width: 95%;
+		  display: block;
+		  height: auto;
+		  overflow: hidden;
+		  /*float: left;*/
+		}
+		input[name=question]{
+		    display: none;
+		}
+		input[name=question] + label{
+		    position: relative;
+		    width: 100%;
+		    display: block;
+		    padding: 20px 20px;
+		    font-size: 1.2em;
+		    cursor: pointer;
+		    background: rgba(246, 246, 246, 1);
+		    color: #3498db;
+		    z-index: 2;
+		    box-shadow: 0 0 10px rgba(0,0,0,.1);
+		    border-radius: 3px;
+		    margin-bottom: 0px;
+		}
+
+		.response{
+			width: 100%;
+		    position: relative;
+		    background: #3498db;
+		    color: #3498db;
+		    padding: 0px 20px 5px;
+		    -webkit-transform: translate3d(0,-52px, 0) rotate(-0.5deg);
+		    z-index: 1;
+		    box-shadow: 0 0 10px rgba(0,0,0,.1);
+		    opacity: 0;
+		    border-radius: 3px;
+		    margin-bottom: 0px;
+		}
+
+		input[name=question]:checked + label{
+		    background: #F6F6F6;
+		    color: #3498db;
+		}
+		input[name=question]:checked + label + .response{
+		    opacity: 1;
+		    visibility: visible;
+		    padding: 10px 20px;
+		    -webkit-transform: translate3d(0, 0, 0) rotate(0deg);
+		    -webkit-filter: blur(0px);
+		    /*height: auto;*/
+		    margin-bottom: 20px;
+		    color: white;
+		}
+
+		.fixed-height{
+		    height: 10px;
+		    overflow: hidden;
+		    opacity: 1 !important;
+		}
+	</style>
+	<div class="card card-block row">
+		<h4>Вопрос-ответ</h4>
+		<br>
+		<section>
+			<p>Общие вопросы:</p>
+			{% for manual in both_manuals %}
+				<input class="animate" type="radio" name="question" id="q{{forloop.counter}}"/>
+				<label class="animate" for="q{{forloop.counter}}">Q: {{manual.question}}</label>
+				<p class="response animate">{{manual.answer}}</p>
+			{% endfor %}
+			<p>Мое руководство:</p>
+			{# <br> #}
+			{% for manual in manuals %}
+				<input class="animate" type="radio" name="question" id="qq{{forloop.counter}}"/>
+				<label class="animate" for="qq{{forloop.counter}}">Q: {{manual.question}}</label>
+				<p class="response animate">{{manual.answer}}</p>
+			{% endfor %}
+		</section>
+	</div>
+{% endblock content %}
+{% block scripts %}
+	<script>
+		$(function(){
+        
+        function setHeight(){
+            $(".response").each(function(index,element){
+                var target = $(element);
+                target.removeClass("fixed-height");
+                var height = target.innerHeight();
+                target.attr("data-height", height)
+                      .addClass("fixed-height");
+            });
+        };
+        
+        $("input[name=question]").on("change", function(){
+            $("p.response").removeAttr("style");
+            
+            var target = $(this).next().next();
+            target.height(target.attr("data-height"));
+        })
+        
+        setHeight();
+    });
+	</script>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load url_tags %}
+{% load crispy_forms_tags %}
+{% block title %}Активация аккаунта{% endblock %}
+{% block additional %}
+  <style type="text/css">
+    .alert-danger{
+      list-style:none;
+      padding: 10px;
+      margin-bottom: 0px;
+    }
+    .activate_back{
+      background: url("{% static 'images/activate.jpg' %}") repeat center center fixed;
+      background-size: cover;
+      height: 38vh; 
+      z-index: -100;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+      -webkit-transform : rotate(5deg) scale(1.5); 
+      -ms-transform     : rotate(5deg) scale(1.5); 
+      transform         : rotate(5deg) scale(1.5);
+    } 
+    @media screen and (max-width: 765px){
+      .activate_back{
+        -webkit-transform : rotate(0deg) scale(1); 
+        -ms-transform     : rotate(0deg) scale(1); 
+        transform         : rotate(0deg) scale(1);
+      }
+    }
+    .activate_block{
+      margin-top: 10vh;
+    }
+    .activate_block > div{
+        box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+    }
+    #div_id_birth > div{
+      display: flex;
+    }
+  </style>
+  <div class="wrapper full"><div class="activate_back"></div></div>
+  <div class="row">
+  <div class="col-md-8 offset-md-2 col-lg-4 offset-lg-4 col-sm-8 offset-sm-2 activate_block">
+  {% if helpful %}
+
+
+    <h1 class="text-white gsap_one">Пожалуйста,</h1>
+    <h4 class="text-white gsap_two">Заполните 5 полезных контаков!</h4>
+    <br> 
+    <div class="card card-block">
+      <ul class="nav nav-tabs mb-1" style="margin-top:-25px;">
+        <li class="nav-item">
+          <span class="nav-link {% if count == 0 %}active text-primary {% endif %}"><b>1</b></span>
+        </li>
+        <li class="nav-item">
+          <span class="nav-link {% if count == 1 %}active text-primary {% endif %}"><b>2</b></span>
+        </li>
+        <li class="nav-item">
+          <span class="nav-link {% if count == 2 %}active text-primary {% endif %}"><b>3</b></span>
+        </li>
+        <li class="nav-item">
+          <span class="nav-link {% if count == 3 %}active text-primary {% endif %}"><b>4</b></span>
+        </li>
+        <li class="nav-item">
+          <span class="nav-link {% if count == 4 %}active text-primary {% endif %}"><b>5</b></span>
+        </li>
+      </ul>
+      <form method="POST" action="">
+        {% csrf_token %}
+        {{helpful|crispy}}
+        <button class="btn btn-primary float-xs-right mt-1">Сохранить</button>
+      </form>
+    </div>
+
+  {% else %}
+
+
+    <h1 class="text-white gsap_one">{{activate.user.first_name|default:activate.user.username}},</h1>
+    <h4 class="text-white gsap_two">Добро пожаловать в Upgrade Land!</h4>
+    <br> 
+    <div class="card card-block">
+    {% if activate %}
+    	<form method="POST" action="">
+        {% csrf_token %}
+        {{form|crispy}}
+        {{profile|crispy}}
+        <button class="btn btn-primary float-xs-right mt-1">Активировать</button>
+      </form>
+    {% else %}
+    	<p class="alert-danger">Недействительный ключ активации!</p>
+    {% endif %}
+    </div>
+
+
+  {% endif %}
+  </div>
+  </div>
+{% endblock additional %}
+{% block scripts %}
+  {% if not helpful %}
+  {% if not error %}
+  <script>
+    var tl = new TimelineMax();
+    tl.from(".gsap_one", 0.5, {css:{left:"+100px",opacity:0}, delay:0.5,ease:Circ.easeInOut}).from(".gsap_two", 0.5, {css:{left:"+100px",opacity:0}, delay:0.1,ease:Circ.easeInOut}).from(".card-block", 1, {css:{bottom:"-50px",left:"100px",opacity:0,rotation:15}, delay:0.3,ease:Circ.easeInOut}).from(".activate_back", 0.5, {css:{top:"-50px",opacity:1,rotation:0}, delay:1,ease:Circ.easeInOut});
+    // tl1.staggerFrom(".circle-info", 0.8, {css:{bottom:"50px",opacity:0},delay:0.3,ease:Bounce.easeOut},0.3).pause();
+  </script>
+  {% endif %}
+  {% endif %}
+{% endblock scripts %}

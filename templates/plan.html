@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load url_tags %}
+{% load plan %}
+{% block title %}План "Выстрел"{% endblock %}
+{% block content %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/selectize.css' %}" />
+  <style type="text/css">
+    input[type=checkbox], .fa-check-circle-o {
+      transform: scale(1.5);
+    }
+    #footer{text-align:center;list-style:none}
+    #footer li{display:inline}
+  </style>
+  {% if new %}
+  <div class="card card-inverse card-primary text-center row">
+    <div class="card-block">
+      <blockquote class="card-blockquote">
+        <p>Рады видеть тебя в этой вкладке! Как это работает:</p>
+        <ol>
+          <li>Поставь определенную цель на 14 дней</li>
+          <li>Выбери наблюдателя из свого круга общения</li>
+          <li>Разбей задачу на подзадачи и выполняй их своевременно</li>
+        </ol>
+        <footer><b>Внимание!</b> Через 14 дней чеклист аннулируется!</footer>
+      </blockquote>
+    </div>
+  </div>
+  <div class="card card-block row">
+    <h4>Добавить план:</h4>
+    <br>
+    <form enctype="multipart/form-data" class="absent-form" action="{% url 'createplan' %}" method="POST">
+      {% csrf_token %}
+      <div class="form-group col-md-12 mx-0 px-0 mb-0">
+          <input name="title" class="form-control" placeholder="Новый план"/>
+          <br>
+          <input name="viewers" id="select-to" type="text" autocomplete="off" tabindex="" id="select-to-selectized" style="width: 100%; opacity: 1; position: relative; left: 0px;" placeholder="Выбор наблюдателей"> 
+        </div>
+    </form>
+      <button class="btn btn-outline-primary mt-1 mb-0 float-md-right float-xs-right sent-absent">
+          <i class="fa fa-plus"></i> Добавить
+        </button>
+      <p class="filename text-success mt-1 ml-1 float-md-left"></p>
+  </div>
+  {% elif failedplan %}
+    <div class="card card-inverse card-danger text-center row">
+          <div class="card-block">
+            <blockquote class="card-blockquote">
+              <br>
+              <h1 class="text-xs-center"><i class="fa fa-lg fa-times-circle"></i></h1>
+              <br>
+              <p class="text-xs-center">К сожалению, Вы не смогли выполнить свой план "{{failedplan.title}}"!</p>
+              <footer class="text-xs-center">Добавьте новый план:</footer>
+              <br>
+            </blockquote>
+          </div>
+        </div>
+        <div class="card card-block row">
+          <h4>План "{{failedplan.title}}" должен был выполниться до <b>{{date|date:"d M Y"}}</b></h4>
+          <ul class="mb-0 list-unstyled">
+            {% for task in tasks %}
+              {% if task.second %}
+                <li class="text-success"><i class="fa fa-check-circle mr-1"></i> {{task.title}}</li>
+              {% elif task.first %}
+                <li class="text-muted"><i class="fa fa-minus-circle mr-1"></i> {{task.title}}</li>
+              {% else %}
+                <li class="text-danger"><i class="fa fa-times-circle mr-1"></i> {{task.title}}</li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="card card-block row">
+          <h4>Добавить план:</h4>
+          <br>
+          <form enctype="multipart/form-data" class="absent-form" action="{% url 'createplan' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group col-md-12 mx-0 px-0 mb-0">
+                <input name="title" class="form-control" placeholder="Новый план"/>
+                <br>
+                <input name="viewers" id="select-to" type="text" autocomplete="off" tabindex="" id="select-to-selectized" style="width: 100%; opacity: 1; position: relative; left: 0px;" placeholder="Выбор наблюдателей"> 
+              </div>
+          </form>
+            <button class="btn btn-outline-primary mt-1 mb-0 float-md-right float-xs-right sent-absent">
+                <i class="fa fa-plus"></i> Добавить
+              </button>
+            <p class="filename text-success mt-1 ml-1 float-md-left"></p>
+        </div>
+  {% elif finishedplan %}
+    <div class="card card-inverse card-success text-center row">
+      <div class="card-block">
+        <blockquote class="card-blockquote">
+          <br>
+          <h1 class="text-xs-center"><i class="fa fa-lg fa-check-circle"></i></h1>
+          <br>
+          <p class="text-xs-center">Рады сообщить, что Вы смогли выполнить свой план "{{finishedplan.title}}"!</p>
+          <footer class="text-xs-center">Добавьте новый план:</footer>
+          <br>
+        </blockquote>
+      </div>
+    </div>
+    <div class="card card-block row">
+      <h4>План "{{finishedplan.title}}" выполнялся в течение {{date.days}} дней</h4>
+      <ul class="mb-0">
+        {% for task in tasks %}
+          <li class="text-success">{{task.title}}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="card card-block row">
+      <h4>Добавить план:</h4>
+      <br>
+      <form enctype="multipart/form-data" class="absent-form" action="{% url 'createplan' %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group col-md-12 mx-0 px-0 mb-0">
+            <input name="title" class="form-control" placeholder="Новый план"/>
+            <br>
+            <input name="viewers" id="select-to" type="text" autocomplete="off" tabindex="" id="select-to-selectized" style="width: 100%; opacity: 1; position: relative; left: 0px;" placeholder="Выбор наблюдателей"> 
+          </div>
+      </form>
+        <button class="btn btn-outline-primary mt-1 mb-0 float-md-right float-xs-right sent-absent">
+            <i class="fa fa-plus"></i> Добавить
+          </button>
+        <p class="filename text-success mt-1 ml-1 float-md-left"></p>
+    </div>
+  {% else %}
+  <div class="card card-block row pb-1">
+  <h4>{{plan.title}} <small class="float-xs-right text-muted"><small> до {{date|date:"d M"}}</small></small></h4>
+  </div>
+  <div class="card card-block row">
+    <h4>Добавить элемент плана:</h4>
+    <br>
+    <form enctype="multipart/form-data" class="formpost" action="{% url 'createtask' plan.id %}" method="POST">
+      {% csrf_token %}
+      <div class="form-group col-md-12 mx-0 px-0 mb-0">
+          <input name="title" class="form-control" placeholder="Новый элемент"/>
+        </div>
+    </form>
+      <button class="btn btn-outline-primary mt-1 mb-0 float-md-right float-xs-right sendpost">
+          <i class="fa fa-plus"></i> Добавить
+        </button>
+      <p class="filename text-success mt-1 ml-1 float-md-left"></p>
+  </div>
+  <div class="card card-block row">
+  <h4>Мой план:</h4>
+  <br>
+  {% student_access request.user.id as open %}
+  {% if open %}
+    <ul class="list-group">
+    {% for task in tasks %}
+      <li class="list-group-item pb-0">
+        {% checkedsecond task.id as double %}
+        {% if double %}
+            <label><i class="fa fa-check-circle-o text-success mr-1"></i> <s class="text-success ">{{task.title}}</s></label>
+        {% else %}
+          <label>
+            <input class="check mr-1" id="{{task.id}}" type="checkbox" {% checkedfirst task.id %}/> {{task.title}}
+          </label>
+        {% endif %}
+        <button class="close" data-dismiss="modal" aria-label="Close" onclick="location.href='{% url 'deleteplan' task.id %}';">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </li>
+    {% endfor %}
+    </ul>
+  {% else %}
+  	<p>Ах ты хитрец :) Но доступа ты не получишь!</p>
+  {% endif %}
+  </div>
+  {% endif %}
+  <div class="card card-block row">
+    <p>Роль наблюдателя:</p>
+    <a class="btn btn-outline-primary" href="{% url 'planchecks' %}">Наблюдения</a>
+  </div>
+{% endblock content %}
+{% block scripts %}
+  <script type="text/javascript">
+  $(".check").on("click", function (e) {
+      var id = $(this).attr('id');
+      $(this).attr("disabled", true);
+      $.ajax({
+        url: "{% url 'checkfirst' request.user.id %}",
+          type: "GET",
+          data: {"task": id},
+          success: function (data) {
+            if(data.content.checked == true){
+              $(".check[id$="+id+"]").prop('checked', true);
+            }else{
+              $(".check[id$="+id+"]").prop('checked', false);
+            };
+            if(data.content.finished){
+              window.location.href = data.content.finished;
+            }
+            $(".check[id$="+id+"]").attr("disabled", false);
+          }
+      });
+  });
+  </script>
+  <script type="text/javascript">
+    $(".sendpost").on("click", function(e){
+      $(this).attr("disabled", true);
+      $(".formpost").submit();
+    });
+    $(".close").on("click", function(e){
+      $(this).attr("disabled", true);
+    });
+  </script>
+  <script type="text/javascript" src="{% static 'js/selectize.min.js' %}"></script>
+  <script type="text/javascript">
+    $('#select-to').selectize({
+        persist: false,
+        maxItems: null,
+        valueField: 'username',
+        labelField: 'name',
+        plugins: ['remove_button'],
+        searchField: ['name', 'username'],
+        options: [
+          {% for student in students %}
+            {username: '{{student.username}}', name: '{{student.get_full_name|default:student.username}}'},      
+          {% endfor %}
+        ],
+        render: {
+            item: function(item, escape) {
+                return '<div>' +
+                    (item.name ? '<span class="name">' + escape(item.name) + ' </span>' : '') +
+                '</div>';
+            },
+            option: function(item, escape) {
+                var label = item.name || item.username;
+                var caption = item.name ? item.username : null;
+                return '<div>' +
+                    '<span class="label">' + escape(label) + ' </span>' +
+                    (caption ? '<span class="caption">@' + escape(caption) + '</span>' : '') +
+                '</div>';
+            }
+        },
+    });
+    $(".sent-absent").on("click",function(){
+      $(this).attr("disabled",true)
+      $(".absent-form").submit();
+    });
+  </script>
+{% endblock %}

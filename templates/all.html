@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load url_tags %}
+{% block title %}Все пользователи{% endblock %}
+{% block content %}
+	<div class="card card-block row">
+		<h4>Пойск пользователя:</h4>
+		<br>
+	    <input name="client" type="text"  class="form-control form-control-lg" id="inputClient" placeholder="Введите данные пользователя"autocomplete="off">
+	    <ul id="client_results" class="list-unstyled"></ul>
+	</div>
+{% endblock content %}
+{% block scripts %}
+	<script>
+		$('#inputClient').on("input",function(e){
+			$.ajax({
+				type: "get",
+				url: "{% url 'client_ajax' %}",
+				data:{'client': $(e.target).val()},
+				// dataType: "json",
+				success: function(content){
+					$('#client_results').html(content.content);
+					if(content.content.exact){
+						window.location.href = content.content.exact;
+					}
+				},
+			});
+		});
+	</script>
+{% endblock %}

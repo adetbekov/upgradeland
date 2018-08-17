@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load lessons %}
+{% load hw %}
+{% block title %}Домашнее задание - {{lesson.name}}{% endblock %}
+{% block content %}
+  <style type="text/css">
+    input[type=checkbox], .fa-check-circle-o {
+      transform: scale(1.5);
+    }
+  </style>
+  <div class="card card-block row">
+  <h4><a href="{{cabinet_url}}"><i class="fa fa-chevron-left"></i> Назад</a>&nbsp;&nbsp; Домашнее задание <b>{{lesson.name}}</b><small class="float-xs-right text-muted"><small>{{lesson.day|date:"d M"}}</small></small></h4>
+  <hr>
+  {% open_lesson request.user.id lesson.id as open %}
+  {% if open %}
+    <ul class="list-group">
+    {% for task in tasks %}
+      <li class="list-group-item pb-0">
+        {% doublechecked request.user.id task.id as double %}
+        {% if double %}
+            <label><i class="fa fa-check-circle-o text-success mr-1"></i> <s class="text-success ">{{task.name}}</s></label>
+        {% else %}
+          <label>
+            <input class="check mr-1" id="{{task.id}}" type="checkbox" {% checked request.user.id task.id %}/> {{task.name}}
+          </label>
+        {% endif %}
+      </li>
+    {% endfor %}
+    </ul>
+  	<p>{{lesson.hw|safe}}</p>
+  {% else %}
+  	<p>Ах ты хитрец :) Но доступа ты не получишь, пока не наступит <b>{{lesson.day|date:"d M Y"}}</b></p>
+  {% endif %}
+  </div>
+{% endblock content %}
+{% block scripts %}
+  <script type="text/javascript">
+  $(".check").on("click", function (e) {
+      var id = $(this).attr('id');
+      $(this).attr("disabled", true);
+      $.ajax({
+        url: "{% url 'checktask' request.user.id %}",
+          type: "GET",
+          data: {"task": id},
+          success: function (data) {
+            if(data.content.checked == true){
+              $(".check[id$="+id+"]").prop('checked', true);
+            }else{
+              $(".check[id$="+id+"]").prop('checked', false);
+            };
+            $(".check[id$="+id+"]").attr("disabled", false);
+          }
+      });
+  });
+  </script>
+{% endblock %}

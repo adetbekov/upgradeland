@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load lessons %}
+{% load url_tags %}
+{% load hw %}
+{% block title %}Чеклист {{user.get_full_name|default:user.username}} - {{lesson.name}}{% endblock %}
+{% block content %}
+  <style type="text/css">
+    input[type=checkbox], .fa-check-circle-o {
+      transform: scale(1.5);
+    }
+  </style>
+  <div class="card card-block row">
+  <h4><a href="{% url 'checks' lesson.id %}"><i class="fa fa-chevron-left"></i> Назад</a>&nbsp;&nbsp; Чеклист {{user.get_full_name|default:user.username}} - {{lesson.name}}<small class="float-xs-right text-muted"><small>{{lesson.day|date:"d M"}}</small></small></h4>
+  <hr>
+  {% teacher_access request.user.id  as open %}
+  {% if open %}
+    <ul class="list-group">
+    {% for task in tasks %}
+      <li class="list-group-item pb-0">
+          <input class="accept mr-1" id="{{task.id}}" type="checkbox" {% accepted user.id task.id %} {% checkedbystudent user.id task.id %}/>
+          <label>
+            <input class="check mr-1" id="{{task.id}}" type="checkbox" {% checked user.id task.id %} {% checkedbystudent user.id task.id %}/> {{task.name}}
+          </label>
+      </li>
+    {% endfor %}
+    </ul>
+  {% else %}
+  	<p>Ах ты хитрец :) Но доступа ты не получишь!</p>
+  {% endif %}
+  </div>
+{% endblock content %}
+{% block scripts %}
+  <script type="text/javascript">
+  $(".check").on("click", function (e) {
+      var id = $(this).attr('id');
+      $(this).attr("disabled", true);
+      $.ajax({
+        url: "{% url 'checktask' user.id %}",
+          type: "GET",
+          data: {"task": id},
+          success: function (data) {
+            if(data.content.checked == true){
+              $(".check[id$="+id+"]").prop('checked', true);
+            }else{
+              $(".check[id$="+id+"]").prop('checked', false);
+            };
+            $(".check[id$="+id+"]").attr("disabled", false);
+          }
+      });
+  });
+  $(".accept").on("click", function (e) {
+      var id = $(this).attr('id');
+      $(this).attr("disabled", true);
+      $.ajax({
+        url: "{% url 'accepttask' user.id %}",
+          type: "GET",
+          data: {"task": id},
+          success: function (data) {
+            if(data.content.checked == true){
+              $(".accept[id$="+id+"]").prop('checked', true);
+            }else{
+              $(".accept[id$="+id+"]").prop('checked', false);
+            };
+            $(".accept[id$="+id+"]").attr("disabled", false);
+          }
+      });
+  });
+  </script>
+{% endblock %}
